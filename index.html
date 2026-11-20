@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SmartCalc India – SIP, EMI, GST and Income Tax Calculators</title>
+<meta name="description" content="Free online SIP, EMI, GST and income tax calculators for India. Instant results, no sign-up.">
+<style>
+:root{--bg:#faf8f3;--ink:#1b1f3b;--mut:#5f6480;--card:#fff;--line:#e2dfd4;--acc:#1b1f3b;--accfg:#fff;--hi:#e8a317;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12142a;--ink:#eceaf5;--mut:#9a9db8;--card:#1c1f3d;--line:#2d3158;--acc:#e8a317;--accfg:#1b1f3b;--hi:#e8a317}}
+:root[data-theme="dark"]{--bg:#12142a;--ink:#eceaf5;--mut:#9a9db8;--card:#1c1f3d;--line:#2d3158;--acc:#e8a317;--accfg:#1b1f3b;--hi:#e8a317}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,"Times New Roman",serif}
+.w{max-width:720px;margin:0 auto;padding:22px 18px 60px}
+.brand{font:700 20px/1 system-ui,sans-serif;letter-spacing:-.01em}.brand i{font-style:normal;color:var(--hi)}
+h1{font-size:clamp(26px,5.5vw,38px);line-height:1.18;margin:.7em 0 .2em}
+h2{font-size:20px;margin:1.6em 0 .3em}
+p{color:var(--mut);max-width:62ch;margin:.4em 0}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0;font-family:system-ui,sans-serif}
+nav a{padding:9px 15px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:15px;background:var(--card)}
+nav a[aria-current=page]{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.g{display:grid;gap:14px;grid-template-columns:1fr;font-family:system-ui,sans-serif}
+label{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
+input,select{width:100%;padding:11px 12px;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+input:focus-visible,select:focus-visible,nav a:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+.out{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-family:system-ui,sans-serif}
+.big{font:700 clamp(30px,8vw,44px)/1.1 Georgia,serif}
+.rows{display:grid;grid-template-columns:1fr auto;gap:6px 14px;margin-top:12px;font-size:15px}
+.rows span:nth-child(even){text-align:right;font-weight:600}
+.bar{height:10px;border-radius:6px;background:var(--hi);margin-top:14px;overflow:hidden}.bar b{display:block;height:100%;background:var(--acc)}
+small{display:block;margin-top:10px;color:var(--mut);font-size:13px}
+footer{margin-top:44px;font-size:13px;color:var(--mut);font-family:system-ui,sans-serif}
+</style>
+</head>
+<body>
+<div class="w">
+<div class="brand">SmartCalc <i>India</i></div>
+<h1 id="h1"></h1>
+<p id="lead"></p>
+<nav id="nav" aria-label="Calculators"></nav>
+<main class="box"><div class="g" id="form"></div><div class="out" id="out" aria-live="polite"></div></main>
+<h2 id="h2"></h2><p id="seo"></p>
+<footer>Results are estimates for planning only and not financial or tax advice. © SmartCalc India</footer>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const rows=a=>'<div class="rows">'+a.map(x=>"<span>"+x[0]+"</span><span>"+x[1]+"</span>").join("")+"</div>";
+const C={
+sip:{n:"SIP",t:"SIP Calculator – Estimate Your Mutual Fund Returns",l:"See how a monthly investment can grow over time.",
+f:[["m","Monthly investment (₹)",5000],["r","Expected return (% a year)",12],["y","Years",10]],
+c:v=>{const r=v.r/1200,n=v.y*12,fv=r?v.m*((Math.pow(1+r,n)-1)/r)*(1+r):v.m*n,inv=v.m*n;
+return{big:inr(fv),lbl:"Estimated value after "+v.y+" years",rows:[["Amount invested",inr(inv)],["Estimated returns",inr(fv-inv)]],pct:inv/fv*100}},
+s:"A SIP (systematic investment plan) invests a fixed amount every month in a mutual fund. This calculator assumes a constant yearly return, compounded monthly, with each instalment paid at the start of the month. Real returns vary with the market."},
+emi:{n:"EMI",t:"EMI Calculator – Home, Car and Personal Loan",l:"Find your monthly instalment and the total interest you will pay.",
+f:[["p","Loan amount (₹)",2500000],["r","Interest rate (% a year)",8.75],["y","Tenure (years)",20]],
+c:v=>{const r=v.r/1200,n=v.y*12,e=r?v.p*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):v.p/n,tot=e*n;
+return{big:inr(e),lbl:"Monthly EMI",rows:[["Principal",inr(v.p)],["Total interest",inr(tot-v.p)],["Total payment",inr(tot)]],pct:v.p/tot*100}},
+s:"EMI stands for equated monthly instalment. It is the fixed amount you repay each month on a home, car or personal loan. A longer tenure lowers the EMI but raises the total interest."},
+gst:{n:"GST",t:"GST Calculator – Add or Remove GST",l:"Work out GST, CGST and SGST for any amount.",
+f:[["a","Amount (₹)",10000],["r","GST rate (%)",18,[0,5,12,18,28]],["k","Mode",0,["Add GST","Remove GST (price includes GST)"]]],
+c:v=>{const net=v.k==1?v.a/(1+v.r/100):v.a,g=net*v.r/100;
+return{big:inr(net+g),lbl:"Price including GST",rows:[["Price before GST",inr(net)],["GST",inr(g)],["CGST",inr(g/2)],["SGST / UTGST",inr(g/2)]],pct:net/(net+g)*100}},
+s:"GST is added to the price of most goods and services in India. For sales within one state it is split equally into CGST and SGST. Choose Remove GST when your amount already includes tax."},
+tax:{n:"Income Tax",t:"Income Tax Calculator – New Regime",l:"Estimate tax on salary income under the new tax regime.",
+f:[["i","Annual salary income (₹)",1500000]],
+c:v=>{const t=Math.max(0,v.i-75000),S=[[400000,0],[800000,.05],[1200000,.1],[1600000,.15],[2000000,.2],[2400000,.25],[Infinity,.3]];
+let tax=0,lo=0;for(const[h,p]of S){if(t>lo)tax+=(Math.min(t,h)-lo)*p;lo=h}
+if(t<=1200000)tax=0;else tax=Math.min(tax,t-1200000);const cess=tax*.04,tot=tax+cess;
+return{big:inr(tot),lbl:"Estimated tax a year",rows:[["Taxable income",inr(t)],["Tax before cess",inr(tax)],["Cess (4%)",inr(cess)],["Monthly",inr(tot/12)]],pct:100-(v.i?tot/v.i*100:0),note:"Uses new-regime slabs with ₹75,000 standard deduction and the ₹12 lakh rebate. Surcharge and old regime are not included. Check current rules at incometax.gov.in."}},
+s:"Under the new tax regime, income up to ₹4 lakh is not taxed and rates rise in steps to 30% above ₹24 lakh. A rebate means no tax is payable if taxable income is up to ₹12 lakh. This tool covers salaried individuals only."}
+};
+function show(){
+const k=C[location.hash.slice(1)]?location.hash.slice(1):"sip",c=C[k];
+document.title=c.t+" | SmartCalc India";$("#h1").textContent=c.t;$("#lead").textContent=c.l;$("#h2").textContent="About the "+c.n+" calculator";$("#seo").textContent=c.s;
+$("#nav").innerHTML=Object.keys(C).map(x=>'<a href="#'+x+'"'+(x===k?' aria-current="page"':"")+">"+C[x].n+"</a>").join("");
+$("#form").innerHTML=c.f.map((f,i)=>{const o=f[3];return"<div><label for='f"+i+"'>"+f[1]+"</label>"+(o?"<select id='f"+i+"'>"+o.map((x,j)=>"<option value='"+(typeof x==="number"?x:j)+"'"+((typeof x==="number"?x:j)==f[2]?" selected":"")+">"+(typeof x==="number"?x+"%":x)+"</option>").join("")+"</select>":"<input id='f"+i+"' type='number' inputmode='decimal' min='0' step='any' value='"+f[2]+"'>")+"</div>"}).join("");
+const run=()=>{const v={};c.f.forEach((f,i)=>v[f[0]]=parseFloat($("#f"+i).value)||0);const r=c.c(v);
+$("#out").innerHTML="<div>"+r.lbl+"</div><div class='big'>"+r.big+"</div>"+rows(r.rows)+"<div class='bar' title='Share of total'><b style='width:"+Math.max(0,Math.min(100,r.pct))+"%'></b></div>"+(r.note?"<small>"+r.note+"</small>":"")};
+$("#form").oninput=run;run()}
+addEventListener("hashchange",show);show();
+</script>
+</body>
+</html>
